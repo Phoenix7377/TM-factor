@@ -1,18 +1,19 @@
 {
   "name": "TM Factor",
   "short_name": "TM Factor",
-  "start_url": "/TM-factor/",
-  "scope": "/TM-factor/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#0f172a",
   "icons": [
     {
-      "src": "https://github.io",
+      "src": "./icon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     }
   ]
 }
+
 
