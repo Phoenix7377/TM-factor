@@ -10,7 +10,7 @@
 <meta property="og:description" content="Is it worth your time? See your money to time value ratio.">
 <!-- For link previews with an image, add og:image with your full https:// icon URL -->
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon.png">
 <style>
 :root{--bg:#0f172a;--card:#1e293b;--text:#f8fafc;--muted:#94a3b8;--accent:#38bdf8;--good:#22c55e;--warn:#f59e0b;--bad:#ef4444}
 *{box-sizing:border-box;font-family:system-ui,-apple-system,sans-serif}
@@ -78,7 +78,7 @@ input,select{width:100%;padding:11px;border-radius:8px;border:1px solid #334155;
   <div class="card result" id="outputCard" aria-live="polite">
     <div class="badge" id="tierBadge"></div><div class="score" id="tmScore"></div><div class="breakdown" id="breakdownText"></div>
   </div>
-  <div class="version-tag">v2.5</div>
+  <div class="version-tag">v2.7</div>
 </div>
 
 <div class="modal-bg" id="installModal"><div class="modal" role="dialog" aria-modal="true">
@@ -88,6 +88,7 @@ input,select{width:100%;padding:11px;border-radius:8px;border:1px solid #334155;
   <button class="calc-btn" id="nativeInstallBtn" style="display:none" onclick="triggerNativeInstall()">Install Now</button>
   <a class="calc-btn" id="chromeIntentBtn" style="display:none" href="#">Open in Chrome to Install</a>
   <button class="copy-btn" id="copyBtn" onclick="copyLink()">Copy link</button>
+  <button class="copy-btn" onclick="markInstalled()">I already have the app</button>
   <button class="close-btn" onclick="dismissInstall()">Not now</button>
 </div></div>
 
@@ -177,6 +178,21 @@ const inApp = /FBAN|FBAV|FB_IAB|Messenger|Instagram|Line\/|MicroMessenger|Snapch
 const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 let deferred = null;
 
+// Android APK from Median: optional, upload next to index.html
+const APK_URL = 'app-release.apk';
+let apkReady = false;
+
+// Is this person already using, or known to have, the app?
+function hasApp(){
+  return standalone || /median|gonative/i.test(ua) || store.get('tm_installed') === '1';
+}
+function markInstalled(){
+  store.set('tm_installed', '1');
+  toggleModal('installModal', false);
+  $('installBar').style.display = 'none';
+  $('helpInstall').style.display = 'none';
+}
+
 const toggleModal = (id, open) => $(id).style.display = open ? 'flex' : 'none';
 const snoozed = () => Date.now() - Number(store.get('tm_snooze') || 0) < 7*864e5;
 function dismissInstall(){
@@ -196,12 +212,22 @@ function steps(){
   return ['Click the install icon in the address bar, or open the browser menu and choose <b>Install</b>.'];
 }
 function openInstallPrompt(){
+  if (hasApp()) return;
   const s = steps();
   $('installSteps').innerHTML = s.length ? '<ol>' + s.map(x => `<li>${x}</li>`).join('') + '</ol>' : '';
   $('nativeInstallBtn').style.display = deferred && !inApp ? 'block' : 'none';
   const chrome = $('chromeIntentBtn');
   chrome.style.display = inApp && isAndroid ? 'block' : 'none';
   chrome.href = `intent://${location.host}${location.pathname}${location.search}#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(location.href)};end`;
+  $('installIntro').textContent = 'Add it to your home screen for one-tap access.';
+  if (isAndroid && !inApp && apkReady) {
+    $('installIntro').textContent = 'Download our Android app.';
+    $('installSteps').innerHTML = '<ol><li>Tap <b>Download APK</b>.</li><li>Open the downloaded file.</li><li>If Android asks, allow installs from your browser, then tap <b>Install</b>.</li></ol>';
+    $('nativeInstallBtn').style.display = 'none';
+    chrome.href = APK_URL;
+  }
+  chrome.textContent = isAndroid && !inApp && apkReady ? 'Download APK' : 'Open in Chrome to Install';
+  if (isAndroid && !inApp && apkReady) chrome.style.display = 'block';
   toggleModal('installModal', true);
 }
 async function triggerNativeInstall(){
@@ -219,7 +245,7 @@ addEventListener('beforeinstallprompt', e => {
   e.preventDefault(); deferred = e;
   if ($('installModal').style.display === 'flex') openInstallPrompt();
 });
-addEventListener('appinstalled', () => { toggleModal('installModal', false); $('installBar').style.display = 'none'; });
+addEventListener('appinstalled', markInstalled);
 document.querySelectorAll('.modal-bg').forEach(m => m.addEventListener('click', e => {
   if (e.target === m) m.id === 'installModal' ? dismissInstall() : toggleModal(m.id, false);
 }));
@@ -228,11 +254,17 @@ addEventListener('keydown', e => {
   if ($('installModal').style.display === 'flex') dismissInstall();
   toggleModal('helpModal', false);
 });
-if (standalone) $('helpInstall').style.display = 'none';
-else if (!snoozed()) {
+if (hasApp()) markInstalled();
+(async () => {
+  try {
+    if ((await navigator.getInstalledRelatedApps?.())?.length) markInstalled();
+  } catch {}
+  // Offer the APK only if the file has actually been uploaded
+  if (isAndroid) try { apkReady = (await fetch(APK_URL, {method:'HEAD', cache:'no-store'})).ok; } catch {}
+  if (hasApp() || snoozed()) return;
   $('installBar').style.display = 'flex';
-  setTimeout(() => { if ($('helpModal').style.display !== 'flex') openInstallPrompt(); }, 2500);
-}
+  setTimeout(() => { if ($('helpModal').style.display !== 'flex' && !snoozed()) openInstallPrompt(); }, 2500);
+})();
 
 // ---- Offline and updates ----
 let waiting = null, updating = false;
