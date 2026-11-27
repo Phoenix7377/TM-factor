@@ -22,10 +22,10 @@
       align-items: center; justify-content: space-between; gap: 10px; font-size: 0.88rem; font-weight: 600;
     }
     .update-bar { background: #0284c7; color: #fff; }
-    .install-bar { background: #1e293b; border: 1px solid var(--accent); color: var(--text); }
+    .install-bar { background: #1e293b; border: 1.5px solid var(--accent); color: var(--text); }
     .banner button {
       background: var(--accent); color: #0f172a; border: none; border-radius: 8px;
-      padding: 8px 13px; font-weight: 800; cursor: pointer; flex-shrink: 0;
+      padding: 8px 14px; font-weight: 800; cursor: pointer; flex-shrink: 0;
     }
     .banner .dismiss {
       background: transparent; color: var(--muted); padding: 4px 6px; font-size: 1rem;
@@ -103,19 +103,13 @@
       <button onclick="applyUpdate()">Update</button>
     </div>
 
-    <!-- Instant 1-Tap Install Banner (Android / Desktop) -->
+    <!-- Always-Visible Browser Install Banner (Hidden inside installed app) -->
     <div class="banner install-bar" id="installBar">
-      <span>Install <strong>TM Factor</strong> as an app</span>
+      <span>Install <strong>TM Factor</strong> on your device</span>
       <div style="display:flex;gap:6px;align-items:center;">
-        <button onclick="triggerInstall()">Install</button>
+        <button onclick="handleInstallClick()">Install App</button>
         <button class="dismiss" onclick="document.getElementById('installBar').style.display='none'">✕</button>
       </div>
-    </div>
-
-    <!-- iOS Safari Install Banner -->
-    <div class="banner install-bar" id="iosInstallBar">
-      <span>Install App: Tap <strong>Share</strong> (↑) then <strong>Add to Home Screen</strong></span>
-      <button class="dismiss" onclick="document.getElementById('iosInstallBar').style.display='none'">✕</button>
     </div>
 
     <div class="header">
@@ -230,7 +224,13 @@
       <div class="breakdown" id="breakdownText"></div>
     </div>
 
-    <div class="version-tag" id="versionLabel">v2.1 • Safe Snapshot Active</div>
+    <div class="version-tag" id="versionLabel">v2.2 • Safe Snapshot Active</div>
   </div>
 
   <!-- First-Launch Hourly Rate Prompt -->
+  <div class="modal-bg" id="onboardingModal">
+    <div class="modal">
+      <h2>Set Your Hourly Value</h2>
+      <p>
+        Before calculating, enter how many dollars <strong>1 hour of your time</strong> is worth to you. This lets TM Factor weigh money against time accurately.
+      </p>
