@@ -4,44 +4,73 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#0f172a" />
-    <link rel="manifest" href="manifest.json" />
-<title>TM Factor</title>
+  <title>TM Factor</title>
+  <link rel="manifest" href="manifest.json" />
   <style>
-    :root { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --muted: #94a3b8; --accent: #38bdf8; }
+    :root {
+      --bg: #0f172a; --card: #1e293b; --text: #f8fafc;
+      --muted: #94a3b8; --accent: #38bdf8; --good: #22c55e;
+      --warn: #f59e0b; --bad: #ef4444;
+    }
     * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
-    body { margin: 0; background: var(--bg); color: var(--text); display: flex; justify-content: center; padding: 20px; }
-    .app { width: 100%; max-width: 420px; position: relative; }
-    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
-    h1 { font-size: 1.4rem; margin: 0 0 4px 0; }
-    .sub { color: var(--muted); font-size: 0.9rem; margin: 0; }
+    body { margin: 0; background: var(--bg); color: var(--text); display: flex; justify-content: center; padding: 18px; }
+    .app { width: 100%; max-width: 440px; }
+
+    /* Update Banner */
+    .update-bar {
+      display: none; background: #0284c7; color: #fff; padding: 12px 14px;
+      border-radius: 12px; margin-bottom: 14px; align-items: center;
+      justify-content: space-between; gap: 10px; font-size: 0.88rem; font-weight: 600;
+    }
+    .update-bar button {
+      background: #fff; color: #0f172a; border: none; border-radius: 8px;
+      padding: 7px 12px; font-weight: 800; cursor: pointer; flex-shrink: 0;
+    }
+
+    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+    h1 { font-size: 1.45rem; margin: 0 0 4px 0; }
+    .sub { color: var(--muted); font-size: 0.88rem; margin: 0; }
     .help-btn {
       width: 34px; height: 34px; border-radius: 50%; border: 1px solid #334155;
       background: var(--card); color: var(--accent); font-weight: 800; font-size: 1rem;
       display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;
     }
-    .card { background: var(--card); border-radius: 14px; padding: 18px; margin-bottom: 16px; }
-    label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 6px; }
+
+    .card { background: var(--card); border-radius: 14px; padding: 16px; margin-bottom: 14px; }
+    label { display: block; font-size: 0.82rem; color: var(--muted); margin-bottom: 6px; }
     input, select {
-      width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #334155;
-      background: #0f172a; color: var(--text); font-size: 1rem; margin-bottom: 14px;
+      width: 100%; padding: 11px; border-radius: 8px; border: 1px solid #334155;
+      background: #0f172a; color: var(--text); font-size: 0.98rem; margin-bottom: 12px;
     }
     .row { display: flex; gap: 10px; }
     .row > div { flex: 1; }
-    .calc-btn {
-      width: 100%; padding: 14px; border: none; border-radius: 10px;
-      background: var(--accent); color: #0f172a; font-weight: 700; font-size: 1rem; cursor: pointer;
+
+    /* Mode Tabs */
+    .tabs { display: flex; gap: 8px; margin-bottom: 14px; background: #0f172a; padding: 5px; border-radius: 10px; }
+    .tab {
+      flex: 1; padding: 9px; border: none; border-radius: 7px; background: transparent;
+      color: var(--muted); font-weight: 700; font-size: 0.88rem; cursor: pointer;
     }
-    .result { text-align: center; padding: 10px 0; display: none; }
-    .score { font-size: 2.4rem; font-weight: 800; margin: 6px 0; }
+    .tab.active { background: var(--card); color: var(--accent); }
+
+    .calc-btn {
+      width: 100%; padding: 13px; border: none; border-radius: 10px;
+      background: var(--accent); color: #0f172a; font-weight: 800; font-size: 1rem; cursor: pointer;
+    }
+
+    .result { text-align: center; padding: 14px; display: none; }
+    .score { font-size: 2.2rem; font-weight: 800; margin: 6px 0; }
     .badge {
       display: inline-block; padding: 4px 12px; border-radius: 999px;
-      font-size: 0.8rem; font-weight: 700; margin-bottom: 8px;
+      font-size: 0.8rem; font-weight: 700; margin-bottom: 6px;
     }
-    .breakdown { color: var(--muted); font-size: 0.9rem; }
+    .breakdown { color: var(--muted); font-size: 0.88rem; line-height: 1.45; }
+    .vs-title { font-size: 0.85rem; font-weight: 800; color: var(--accent); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .version-tag { text-align: center; font-size: 0.75rem; color: #475569; margin-top: 8px; }
 
-    /* Help Modal */
+    /* Modals */
     .modal-bg {
-      display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75);
+      display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8);
       justify-content: center; align-items: center; padding: 20px; z-index: 50;
     }
     .modal {
@@ -49,7 +78,7 @@
       max-width: 400px; max-height: 85vh; overflow-y: auto; border: 1px solid #334155;
     }
     .modal h2 { margin-top: 0; font-size: 1.2rem; color: var(--accent); }
-    .modal h3 { font-size: 0.95rem; margin: 16px 0 6px 0; color: var(--text); }
+    .modal h3 { font-size: 0.95rem; margin: 14px 0 6px 0; color: var(--text); }
     .modal p, .modal li { font-size: 0.88rem; color: var(--muted); line-height: 1.45; }
     .modal ul { padding-left: 18px; margin: 6px 0; }
     .copy-btn {
@@ -57,124 +86,153 @@
       background: transparent; color: var(--accent); font-weight: 700; cursor: pointer;
     }
     .close-btn {
-      width: 100%; padding: 12px; margin-top: 12px; border-radius: 8px; border: none;
+      width: 100%; padding: 12px; margin-top: 10px; border-radius: 8px; border: none;
       background: #334155; color: var(--text); font-weight: 700; cursor: pointer;
     }
   </style>
 </head>
 <body>
   <div class="app">
+    <!-- Safe Update Notification Banner -->
+    <div class="update-bar" id="updateBar">
+      <span id="updateText">New update ready!</span>
+      <button onclick="applyUpdate()">Update</button>
+    </div>
+
     <div class="header">
       <div>
         <h1>TM Factor</h1>
-        <p class="sub">Convert money &amp; time into Life Energy</p>
+        <p class="sub">Measure true losses &amp; gains in time and money</p>
       </div>
-      <button class="help-btn" onclick="toggleHelp(true)" aria-label="Help">?</button>
+      <button class="help-btn" onclick="toggleModal('helpModal', true)" aria-label="Help">?</button>
     </div>
 
+    <!-- Hourly Value Card -->
     <div class="card">
-      <label for="rate">Your Hourly Value ($/hr)</label>
-      <input type="number" id="rate" value="20" min="1" step="0.5" />
+      <label for="rate">What is 1 hour of your time worth? ($/hr)</label>
+      <input type="number" id="rate" value="20" min="0.01" step="0.5" />
     </div>
 
-    <div class="card">
-      <label for="money">Money Spent ($)</label>
-      <input type="number" id="money" placeholder="e.g. 40" min="0" step="0.01" />
+    <!-- Mode Switcher -->
+    <div class="tabs">
+      <button class="tab active" id="tabSingle" onclick="switchMode('single')">Single Decision</button>
+      <button class="tab" id="tabCompare" onclick="switchMode('compare')">Compare A vs. B</button>
+    </div>
+
+    <!-- SINGLE DECISION MODE -->
+    <div id="singleMode" class="card">
+      <label for="direction">Decision Type</label>
+      <select id="direction">
+        <option value="loss">Cost / Loss (Spending time &amp; money)</option>
+        <option value="gain">Gain / Earning (Making or saving time &amp; money)</option>
+      </select>
+
+      <label for="money">Money Amount ($)</label>
+      <input type="number" id="money" placeholder="e.g. 20" min="0" step="0.01" />
+
       <div class="row">
         <div>
-          <label for="time">Time Spent</label>
-          <input type="number" id="time" placeholder="e.g. 1.5" min="0" step="0.1" />
+          <label for="time">Time Amount</label>
+          <input type="number" id="time" placeholder="e.g. 2" min="0" step="any" />
         </div>
         <div>
-          <label for="unit">Unit</label>
+          <label for="unit">Time Unit</label>
           <select id="unit">
-            <option value="hours">Hours</option>
+            <option value="seconds">Seconds</option>
             <option value="minutes">Minutes</option>
+            <option value="hours" selected>Hours</option>
+            <option value="days">Days</option>
+            <option value="weeks">Weeks</option>
+            <option value="months">Months</option>
+            <option value="years">Years</option>
           </select>
         </div>
       </div>
-      <button class="calc-btn" onclick="calculateTM()">Calculate TM Factor</button>
+      <button class="calc-btn" onclick="calculateSingle()">Calculate TM Factor</button>
     </div>
 
+    <!-- COMPARE A VS B MODE -->
+    <div id="compareMode" style="display:none;">
+      <div class="card">
+        <div class="vs-title">Option A</div>
+        <div class="row">
+          <div>
+            <label>Money Earned/Saved ($)</label>
+            <input type="number" id="moneyA" placeholder="e.g. 20" step="0.01" />
+          </div>
+          <div>
+            <label>Time Spent</label>
+            <input type="number" id="timeA" placeholder="e.g. 2" step="any" />
+          </div>
+        </div>
+        <label>Time Unit (Option A)</label>
+        <select id="unitA">
+          <option value="seconds">Seconds</option>
+          <option value="minutes">Minutes</option>
+          <option value="hours" selected>Hours</option>
+          <option value="days">Days</option>
+          <option value="weeks">Weeks</option>
+          <option value="months">Months</option>
+          <option value="years">Years</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <div class="vs-title">Option B</div>
+        <div class="row">
+          <div>
+            <label>Money Earned/Saved ($)</label>
+            <input type="number" id="moneyB" placeholder="e.g. 30" step="0.01" />
+          </div>
+          <div>
+            <label>Time Spent</label>
+            <input type="number" id="timeB" placeholder="e.g. 3.5" step="any" />
+          </div>
+        </div>
+        <label>Time Unit (Option B)</label>
+        <select id="unitB">
+          <option value="seconds">Seconds</option>
+          <option value="minutes">Minutes</option>
+          <option value="hours" selected>Hours</option>
+          <option value="days">Days</option>
+          <option value="weeks">Weeks</option>
+          <option value="months">Months</option>
+          <option value="years">Years</option>
+        </select>
+      </div>
+
+      <button class="calc-btn" onclick="calculateCompare()">Compare Options</button>
+    </div>
+
+    <!-- OUTPUT CARD -->
     <div class="card result" id="outputCard">
-      <div class="badge" id="tierBadge">Low Friction</div>
+      <div class="badge" id="tierBadge">Result</div>
       <div class="score" id="tmScore">0.00 TM</div>
       <div class="breakdown" id="breakdownText"></div>
     </div>
+
+    <div class="version-tag" id="versionLabel">v2.0 • Safe Snapshot Active</div>
   </div>
 
-  <!-- Help & Install Popup -->
-  <div class="modal-bg" id="helpModal" onclick="if(event.target===this)toggleHelp(false)">
+  <!-- First-Launch Hourly Rate Prompt -->
+  <div class="modal-bg" id="onboardingModal">
     <div class="modal">
-      <h2>What is TM Factor?</h2>
+      <h2>Set Your Hourly Value</h2>
       <p>
-        Every decision costs both <strong>money</strong> and <strong>time</strong>. TM Factor converts both into one single number so you can judge the true cost of a choice.
+        Before calculating, enter how many dollars <strong>1 hour of your time</strong> is worth to you. This lets TM Factor weigh money against time accurately.
       </p>
-      <ul>
-        <li><strong>Hours Mode:</strong> Combines the work-hours needed to pay for the item plus the hours spent doing it.</li>
-        <li><strong>Minutes Mode:</strong> Divides the result by 60 to scale down quick, everyday decisions.</li>
-      </ul>
-
-      <h3>Install on Other Devices</h3>
-      <p>No app store needed. Open this link in any device's browser:</p>
-      <ul>
-        <li><strong>Android (Chrome):</strong> Tap <strong>⋮</strong> (top right) → <strong>Add to Home screen</strong>.</li>
-        <li><strong>iPhone / iPad (Safari):</strong> Tap the <strong>Share</strong> icon (bottom bar) → <strong>Add to Home Screen</strong>.</li>
-        <li><strong>PC / Mac (Chrome or Edge):</strong> Click the <strong>Install</strong> icon inside the right side of the address bar.</li>
-      </ul>
-      <button class="copy-btn" id="copyBtn" onclick="copyAppLink()">Copy App Link to Share</button>
-      <button class="close-btn" onclick="toggleHelp(false)">Got It</button>
+      <label for="initRate">Your Hourly Value ($/hr)</label>
+      <input type="number" id="initRate" value="20" min="0.01" step="0.5" />
+      <button class="calc-btn" onclick="saveInitialRate()">Save &amp; Start</button>
     </div>
   </div>
 
-  <script>
-    const rateInput = document.getElementById('rate');
-    rateInput.value = localStorage.getItem('tm_rate') || 20;
-    rateInput.addEventListener('change', () => localStorage.setItem('tm_rate', rateInput.value));
+  <!-- Help & Share Modal -->
+  <div class="modal-bg" id="helpModal" onclick="if(event.target===this)toggleModal('helpModal',false)">
+    <div class="modal">
+      <h2>How TM Factor Works</h2>
+      <p>
+        TM Factor converts both <strong>time</strong> and <strong>money</strong> into one unified score using your personal hourly value.
+      </p>
+      <ul>
 
-    function toggleHelp(show) {
-      document.getElementById('helpModal').style.display = show ? 'flex' : 'none';
-    }
-
-    function copyAppLink() {
-      navigator.clipboard.writeText(window.location.href);
-      const btn = document.getElementById('copyBtn');
-      btn.textContent = 'Link Copied!';
-      setTimeout(() => btn.textContent = 'Copy App Link to Share', 2000);
-    }
-
-    function calculateTM() {
-      const rate = parseFloat(rateInput.value) || 20;
-      const money = parseFloat(document.getElementById('money').value) || 0;
-      const time = parseFloat(document.getElementById('time').value) || 0;
-      const unit = document.getElementById('unit').value;
-
-      const moneyHours = money / rate;
-      let tmFactor = moneyHours + time;
-
-      if (unit === 'minutes') {
-        tmFactor = tmFactor / 60;
-      }
-
-      document.getElementById('outputCard').style.display = 'block';
-      document.getElementById('tmScore').textContent = tmFactor.toFixed(2) + ' TM';
-      document.getElementById('breakdownText').textContent =
-        unit === 'minutes'
-          ? `(${moneyHours.toFixed(2)} money-hrs + ${time.toFixed(1)} min) ÷ 60`
-          : `${moneyHours.toFixed(2)} hrs of money + ${time.toFixed(2)} hrs of time`;
-
-      const badge = document.getElementById('tierBadge');
-      if (tmFactor <= 1) {
-        badge.textContent = 'Low Friction';
-        badge.style.background = '#22c55e33'; badge.style.color = '#22c55e';
-      } else if (tmFactor <= 5) {
-        badge.textContent = 'Moderate Cost';
-        badge.style.background = '#f59e0b33'; badge.style.color = '#f59e0b';
-      } else {
-        badge.textContent = 'High Cost';
-        badge.style.background = '#ef444433'; badge.style.color = '#ef4444';
-      }
-    }
-  </script>
-</body>
-</html>
