@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0f172a">
 <title>TM Factor</title>
-<meta name="description" content="See your money to time value ratio.">
+<meta name="description" content="See what your time is worth in money.">
 <meta property="og:title" content="TM Factor">
-<meta property="og:description" content="Is it worth your time? See your money to time value ratio.">
+<meta property="og:description" content="Is it worth your time? See what it is worth in money.">
 <!-- For link previews with an image, add og:image with your full https:// icon URL -->
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon.png">
@@ -17,7 +17,7 @@
 body{margin:0;background:var(--bg);color:var(--text);display:flex;justify-content:center;padding:18px}
 .app{width:100%;max-width:440px}
 .banner{display:none;padding:12px 14px;border-radius:12px;margin-bottom:12px;align-items:center;justify-content:space-between;gap:10px;font-size:.88rem;font-weight:600}
-.update-bar{background:#0284c7}.install-bar{background:var(--card);border:1.5px solid var(--accent)}
+.install-bar{background:var(--card);border:1.5px solid var(--accent)}
 .banner button{background:var(--accent);color:var(--bg);border:0;border-radius:8px;padding:8px 14px;font-weight:800;cursor:pointer}
 .banner .dismiss{background:transparent;color:var(--muted);padding:4px 6px}
 .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
@@ -27,14 +27,10 @@ h1{font-size:1.45rem;margin:0 0 4px}.sub{color:var(--muted);font-size:.88rem;mar
 label{display:block;font-size:.82rem;color:var(--muted);margin-bottom:6px}
 input,select{width:100%;padding:11px;border-radius:8px;border:1px solid #334155;background:var(--bg);color:var(--text);font-size:16px;margin-bottom:12px}
 .row{display:flex;gap:10px}.row>div{flex:1;min-width:0}
-.tabs{display:flex;gap:8px;margin-bottom:14px;padding:5px}
-.tab{flex:1;padding:9px;border:0;border-radius:7px;background:transparent;color:var(--muted);font-weight:700;cursor:pointer}
-.tab.active{background:var(--card);color:var(--accent)}
 .calc-btn{width:100%;padding:13px;border:0;border-radius:10px;background:var(--accent);color:var(--bg);font-weight:800;font-size:1rem;cursor:pointer;display:block;text-align:center;text-decoration:none}
-.result{text-align:center;display:none;margin-top:14px}.score{font-size:2.2rem;font-weight:800;margin:6px 0}
+.result{text-align:center;display:none;margin-top:14px}.score{font-size:2.2rem;font-weight:800;margin:6px 0;overflow-wrap:anywhere}
 .badge{display:inline-block;padding:4px 12px;border-radius:999px;font-size:.8rem;font-weight:700;color:var(--bg)}
 .breakdown{color:var(--muted);font-size:.88rem;line-height:1.6}
-.vs-title{font-size:.85rem;font-weight:800;color:var(--accent);margin-bottom:8px;text-transform:uppercase}
 .version-tag{text-align:center;font-size:.75rem;color:#64748b;margin-top:8px}
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);justify-content:center;align-items:center;padding:20px;z-index:50}
 .modal{background:var(--card);border-radius:16px;padding:22px;width:100%;max-width:400px;max-height:85vh;overflow-y:auto;border:1px solid #334155}
@@ -46,39 +42,31 @@ input,select{width:100%;padding:11px;border-radius:8px;border:1px solid #334155;
 </head>
 <body>
 <div class="app">
-  <div class="banner update-bar" id="updateBar"><span>New update ready!</span><button onclick="applyUpdate()">Update</button></div>
   <div class="banner install-bar" id="installBar">
     <span>Install <strong>TM Factor</strong> on your device</span>
     <div><button onclick="openInstallPrompt()">Install</button><button class="dismiss" onclick="dismissInstall()" aria-label="Dismiss">✕</button></div>
   </div>
   <div class="header">
-    <div><h1>TM Factor</h1><p class="sub">Measure true losses &amp; gains in time and money</p></div>
+    <div><h1>TM Factor</h1><p class="sub">See what your time is worth</p></div>
     <button class="help-btn" onclick="toggleModal('helpModal',true)" aria-label="Help">?</button>
   </div>
   <div class="card">
     <label for="rate">What is 1 hour of your time worth? ($/hr)</label>
-    <input type="number" inputmode="decimal" id="rate" value="20" min="0.01" step="any">
+    <input type="number" inputmode="decimal" id="rate" form="calc" value="20" min="0" step="any">
   </div>
-  <div class="tabs">
-    <button class="tab active" id="tabSingle" onclick="switchMode('single')">Single Decision</button>
-    <button class="tab" id="tabCompare" onclick="switchMode('compare')">Compare A vs. B</button>
-  </div>
-  <div id="singleMode" class="card">
+  <form class="card" id="calc" novalidate>
     <label for="direction">Decision Type</label>
-    <select id="direction"><option value="loss">Cost / Loss (spending)</option><option value="gain">Gain (making or saving)</option></select>
-    <label for="money">Money Amount ($)</label>
-    <input type="number" inputmode="decimal" id="money" placeholder="e.g. 20" min="0" step="any">
+    <select id="direction"><option value="loss">Cost / Loss (spending time)</option><option value="gain">Gain (saving time)</option></select>
     <div class="row">
       <div><label for="time">Time Amount</label><input type="number" inputmode="decimal" id="time" placeholder="e.g. 2" min="0" step="any"></div>
-      <div><label for="unit">Time Unit</label><select id="unit" class="units"></select></div>
+      <div><label for="unit">Time Unit</label><select id="unit"></select></div>
     </div>
-    <button class="calc-btn" onclick="calculateSingle()">Calculate TM Factor</button>
-  </div>
-  <div id="compareMode" style="display:none"></div>
+    <button class="calc-btn" type="submit">Calculate TM Factor</button>
+  </form>
   <div class="card result" id="outputCard" aria-live="polite">
     <div class="badge" id="tierBadge"></div><div class="score" id="tmScore"></div><div class="breakdown" id="breakdownText"></div>
   </div>
-  <div class="version-tag">v2.7</div>
+  <div class="version-tag">v3.0</div>
 </div>
 
 <div class="modal-bg" id="installModal"><div class="modal" role="dialog" aria-modal="true">
@@ -94,10 +82,9 @@ input,select{width:100%;padding:11px;border-radius:8px;border:1px solid #334155;
 
 <div class="modal-bg" id="helpModal"><div class="modal" role="dialog" aria-modal="true">
   <h2>How it works</h2>
-  <p><b>Time value</b> = hours × your hourly rate.</p>
-  <p><b>TM Factor</b> = money ÷ time value. 1.00 TM means they are equal.</p>
-  <p>When comparing, the option with the higher net (money minus time value) wins.</p>
-  <p>Months are 30.44 days and days are 24 hours.</p>
+  <p><b>TM Factor</b> = the money value of your time: hours × your hourly rate.</p>
+  <p>Example: 2 hours at $20 per hour is $40.00.</p>
+  <p>Time is counted around the clock: a day is 24 hours, a month is 30.44 days and a year is 365.25 days.</p>
   <button class="copy-btn" onclick="toggleModal('helpModal',false);openInstallPrompt()" id="helpInstall">Install the app</button>
   <button class="close-btn" onclick="toggleModal('helpModal',false)">Close</button>
 </div></div>
@@ -110,64 +97,39 @@ const store = {
 };
 const HOURS = {seconds:1/3600, minutes:1/60, hours:1, days:24, weeks:168, months:730.5, years:8766};
 
-// Build Option A and B from one template
-$('compareMode').innerHTML = ['A','B'].map(k => `
-  <div class="card"><div class="vs-title">Option ${k}</div><div class="row">
-    <div><label for="money${k}">Money Earned/Saved ($)</label><input type="number" inputmode="decimal" id="money${k}" step="any"></div>
-    <div><label for="time${k}">Time Spent</label><input type="number" inputmode="decimal" id="time${k}" min="0" step="any"></div>
-  </div><label for="unit${k}">Time Unit</label><select id="unit${k}" class="units"></select></div>`).join('')
-  + '<button class="calc-btn" onclick="calculateCompare()">Compare Options</button>';
-document.querySelectorAll('.units').forEach(s => Object.keys(HOURS).forEach(u =>
-  s.add(new Option(u[0].toUpperCase()+u.slice(1), u, u==='hours', u==='hours'))));
+Object.keys(HOURS).forEach(u =>
+  $('unit').add(new Option(u[0].toUpperCase()+u.slice(1), u, u==='hours', u==='hours')));
 if (store.get('tm_rate')) $('rate').value = store.get('tm_rate');
-$('rate').addEventListener('input', e => store.set('tm_rate', e.target.value));
 
-function switchMode(m){
-  $('singleMode').style.display = m==='single' ? 'block' : 'none';
-  $('compareMode').style.display = m==='compare' ? 'block' : 'none';
-  $('tabSingle').classList.toggle('active', m==='single');
-  $('tabCompare').classList.toggle('active', m==='compare');
-  $('outputCard').style.display = 'none';
-}
-
-// ---- Calculation (swap in your own formula here) ----
-const usd = n => n.toLocaleString('en-US',{style:'currency',currency:'USD'});
-function measure(suffix, unitId){
-  const rate = parseFloat($('rate').value);
-  const money = parseFloat($('money'+suffix).value || 0);
-  const time = parseFloat($('time'+suffix).value || 0);
-  const entered = $('money'+suffix).value !== '' || $('time'+suffix).value !== '';
-  if (!(rate > 0) || !entered || time < 0) return null;
-  const value = time * HOURS[$(unitId).value] * rate;
-  return {money, value, ratio: value ? money / value : null, net: money - value};
-}
-const tm = r => r === null ? '— TM' : r.toFixed(2) + ' TM';
-function show(badge, color, score, html){
+// ---- Calculation ----
+const usd = n => n > 0 && n < 0.01 ? 'Less than $0.01' : n.toLocaleString('en-US',{style:'currency',currency:'USD'});
+const num = n => n.toLocaleString('en-US',{maximumFractionDigits:4});
+function show(badge, color, score, text){
   $('tierBadge').textContent = badge;
   $('tierBadge').style.background = `var(--${color})`;
   $('tmScore').textContent = score;
-  $('breakdownText').innerHTML = html;
+  $('breakdownText').textContent = text;
   $('outputCard').style.display = 'block';
-  $('outputCard').scrollIntoView({behavior:'smooth', block:'nearest'});
 }
-const invalid = () => show('Check inputs','warn','—','Enter an hourly rate above 0 and an amount of money or time.');
 function calculateSingle(){
-  const r = measure('', 'unit');
-  if (!r || r.money < 0) return invalid();
+  const rate = Number($('rate').value), time = Number($('time').value);
+  const hours = time * HOURS[$('unit').value], value = hours * rate;
+  if (!(rate > 0 && time > 0 && Number.isFinite(value)))
+    return show('Check inputs','warn','—','Enter an hourly rate and a time amount above 0.');
   const loss = $('direction').value === 'loss';
-  show(loss ? 'True loss' : 'True gain', loss ? 'bad' : 'good', tm(r.ratio),
-    `Money: ${usd(r.money)}<br>Time value: ${usd(r.value)}<br><b>Total ${loss?'cost':'gain'}: ${usd(r.money + r.value)}</b>`);
+  show(loss ? 'Time cost' : 'Time gained', loss ? 'bad' : 'good', usd(value),
+    `${hours < 0.0001 ? 'Under 0.0001' : num(hours)} hours × ${usd(rate)} per hour`);
 }
-function calculateCompare(){
-  const a = measure('A','unitA'), b = measure('B','unitB');
-  if (!a || !b) return invalid();
-  const diff = a.net - b.net;
-  const tie = Math.abs(diff) < 0.005;
-  const win = diff > 0 ? 'A' : 'B';
-  show(tie ? 'Tie' : `Option ${win} wins`, tie ? 'warn' : 'good',
-    tie ? 'Even' : '+' + usd(Math.abs(diff)),
-    `A: ${tm(a.ratio)}, net ${usd(a.net)}<br>B: ${tm(b.ratio)}, net ${usd(b.net)}`);
-}
+$('calc').addEventListener('submit', e => {
+  e.preventDefault();
+  calculateSingle();
+  $('outputCard').scrollIntoView({behavior:'smooth', block:'nearest'});
+});
+// Keep a shown result in step with the inputs
+['rate','time','unit','direction'].forEach(id => $(id).addEventListener('input', () => {
+  if (id === 'rate') store.set('tm_rate', $('rate').value);
+  if ($('outputCard').style.display === 'block') calculateSingle();
+}));
 
 // ---- Install prompt ----
 const ua = navigator.userAgent;
@@ -266,20 +228,8 @@ if (hasApp()) markInstalled();
   setTimeout(() => { if ($('helpModal').style.display !== 'flex' && !snoozed()) openInstallPrompt(); }, 2500);
 })();
 
-// ---- Offline and updates ----
-let waiting = null, updating = false;
-function offerUpdate(w){ waiting = w; $('updateBar').style.display = 'flex'; }
-function applyUpdate(){ if (waiting) { updating = true; waiting.postMessage('SKIP_WAITING'); } }
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').then(reg => {
-    if (reg.waiting && navigator.serviceWorker.controller) offerUpdate(reg.waiting);
-    reg.addEventListener('updatefound', () => {
-      const w = reg.installing;
-      w.addEventListener('statechange', () => { if (w.state === 'installed' && navigator.serviceWorker.controller) offerUpdate(w); });
-    });
-  }).catch(() => {});
-  navigator.serviceWorker.addEventListener('controllerchange', () => { if (updating) location.reload(); });
-}
+// ---- Offline safety net ----
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js', {updateViaCache:'none'}).catch(() => {});
 </script>
 </body>
 </html>
